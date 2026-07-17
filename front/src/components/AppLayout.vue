@@ -12,7 +12,7 @@
           <template #title><el-icon><Goods /></el-icon><span>商品管理</span></template>
           <el-menu-item index="/products">商品列表</el-menu-item>
         </el-sub-menu>
-        <el-sub-menu index="stock">
+        <el-sub-menu index="stock" v-if="authStore.user?.role !== 'viewer'">
           <template #title><el-icon><List /></el-icon><span>出入库管理</span></template>
           <el-menu-item index="/stock-in">入库管理</el-menu-item>
           <el-menu-item index="/stock-out">出库管理</el-menu-item>
