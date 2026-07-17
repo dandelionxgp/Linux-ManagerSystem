@@ -132,6 +132,7 @@
       </el-table>
       <template #footer>
         <el-button @click="detailVisible = false">关闭</el-button>
+        <el-button type="success" @click="handlePrint">打印</el-button>
       </template>
     </el-dialog>
   </div>
@@ -141,7 +142,9 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getStockInListApi, getStockInDetailApi, createStockInApi, reverseStockInApi } from '@/api/stock'
+import { getStockInPrintApi } from '@/api/report'
 import { getProductListApi } from '@/api/product'
+import { usePrint } from '@/composables/usePrint'
 
 const list = ref([])
 const total = ref(0)
@@ -261,6 +264,14 @@ async function handleReverse(id) {
     ElMessage.success('入库单已冲销')
     fetchList()
   } catch { /* 已统一处理 */ }
+}
+
+async function handlePrint() {
+  if (!detail.value) return
+  try {
+    const res = await getStockInPrintApi(detail.value.id)
+    usePrint(res.data)
+  } catch { /* ignore */ }
 }
 </script>
 

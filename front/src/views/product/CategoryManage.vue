@@ -2,7 +2,7 @@
   <div>
     <!-- 顶部工具栏 -->
     <div class="toolbar">
-      <el-button type="primary" @click="openDialog()">新增分类</el-button>
+      <el-button v-if="canWrite" type="primary" @click="openDialog()">新增分类</el-button>
     </div>
 
     <!-- 分类表格 -->
@@ -12,7 +12,7 @@
       <el-table-column prop="name" label="分类名称" />
       <el-table-column prop="sort_order" label="排序" width="80" />
       <el-table-column prop="created_at" label="创建时间" width="170" />
-      <el-table-column label="操作" width="200">
+      <el-table-column v-if="canWrite" label="操作" width="200">
         <template #default="{ row }">
           <el-button size="small" @click="openDialog(row)">编辑</el-button>
           <!-- 新增子分类 -->
@@ -56,6 +56,9 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getCategoryListApi, createCategoryApi, updateCategoryApi, deleteCategoryApi } from '@/api/category'
+import { useRole } from '@/composables/useRole'
+
+const { canWrite } = useRole()
 
 const list = ref([])
 const loading = ref(false)

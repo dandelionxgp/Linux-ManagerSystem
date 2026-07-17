@@ -20,7 +20,7 @@
         <el-menu-item index="/stock-query">
           <el-icon><Search /></el-icon><span>库存查询</span>
         </el-menu-item>
-        <el-menu-item index="/inventory">
+        <el-menu-item index="/inventory" v-if="authStore.user?.role !== 'viewer'">
           <el-icon><Check /></el-icon><span>库存盘点</span>
         </el-menu-item>
         <el-sub-menu index="base">
@@ -52,6 +52,7 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/store/auth'
 import {
@@ -61,6 +62,19 @@ import {
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
+
+// 页面刷新时恢复用户信息（含角色缓存）
+onMounted(async () => {
+  if (authStore.token && !authStore.user) {
+    try {
+      await authStore.fetchUser()
+    } catch {
+      // token 已过期 → 跳转登录
+      authStore.logout()
+      router.push('/login')
+    }
+  }
+})
 
 async function handleLogout() {
   await authStore.logout()

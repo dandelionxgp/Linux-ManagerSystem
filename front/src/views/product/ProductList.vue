@@ -7,8 +7,8 @@
       <el-tree-select v-model="categoryFilter" :data="categoryOptions" :props="{ label: 'name', value: 'id' }"
         placeholder="选择分类" style="width: 200px; margin-left: 10px" clearable check-strictly
         @change="fetchList" />
-      <el-button type="primary" style="margin-left: auto" @click="openDialog()">新增商品</el-button>
-      <el-button style="margin-left: 10px" @click="triggerImport">批量导入</el-button>
+      <el-button v-if="canWrite" type="primary" style="margin-left: auto" @click="openDialog()">新增商品</el-button>
+      <el-button v-if="canWrite" style="margin-left: 10px" @click="triggerImport">批量导入</el-button>
       <input ref="fileInputRef" type="file" accept=".xlsx,.csv,.xls" style="display: none"
         @change="handleFileChange" />
     </div>
@@ -33,7 +33,7 @@
       <el-table-column prop="safety_stock" label="安全库存" width="90" />
       <el-table-column prop="purchase_price" label="参考进价" width="100" />
       <el-table-column prop="sale_price" label="参考售价" width="100" />
-      <el-table-column label="操作" width="180" fixed="right">
+      <el-table-column v-if="canWrite" label="操作" width="180" fixed="right">
         <template #default="{ row }">
           <el-button size="small" @click="openDialog(row)">编辑</el-button>
           <el-popconfirm title="确定要删除此商品吗？" @confirm="handleDelete(row.id)">
@@ -99,6 +99,9 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getProductListApi, createProductApi, updateProductApi, deleteProductApi, importProductApi, getCategoryOptionsApi } from '@/api/product'
+import { useRole } from '@/composables/useRole'
+
+const { canWrite } = useRole()
 
 const list = ref([])
 const total = ref(0)

@@ -52,7 +52,7 @@ const routes = [
         path: 'inventory',
         name: 'InventoryCheck',
         component: () => import('@/views/inventory/InventoryCheck.vue'),
-        meta: { title: '库存盘点' }
+        meta: { title: '库存盘点', role: 'admin,manager' }
       },
       {
         path: 'system/users',
@@ -75,14 +75,26 @@ const router = createRouter({
   routes
 })
 
-// 路由守卫：未登录跳转到登录页
+// 路由守卫：未登录跳转到登录页；角色不足跳转仪表盘
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token')
   if (to.path !== '/login' && !token) {
     next('/login')
-  } else {
-    next()
+    return
   }
+
+  // 角色权限检查
+  if (to.meta.role) {
+    const allowedRoles = to.meta.role.split(',')
+    // 从 localStorage 读取用户角色（登录时存入）
+    const userRole = localStorage.getItem('userRole') || ''
+    if (!allowedRoles.includes(userRole)) {
+      next('/dashboard')  // 无权限 → 跳转仪表盘
+      return
+    }
+  }
+
+  next()
 })
 
 export default router

@@ -3,9 +3,14 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\InventoryController;
+use App\Http\Controllers\Api\LogController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\StockInController;
 use App\Http\Controllers\Api\StockOutController;
+use App\Http\Controllers\Api\StockQueryController;
 use App\Http\Controllers\Api\UserController;
 
 // ========== 公开路由 ==========
@@ -44,5 +49,34 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('stock-outs', [StockOutController::class, 'store']);
         Route::get('stock-outs/{stockOut}', [StockOutController::class, 'show']);
         Route::post('stock-outs/{stockOut}/reverse', [StockOutController::class, 'reverse']);
+    });
+
+    // 库存查询（所有认证用户）
+    Route::get('/stock/query', [StockQueryController::class, 'query']);
+    Route::get('/stock/alerts', [StockQueryController::class, 'alerts']);
+    Route::get('/stock/flow', [StockQueryController::class, 'flow']);
+
+    // 盘点管理（所有认证用户可查看，admin/manager 可新建/录入/确认）
+    Route::get('inventories', [InventoryController::class, 'index']);
+    Route::get('inventories/{inventory}', [InventoryController::class, 'show']);
+    Route::middleware('role:admin,manager')->group(function () {
+        Route::post('inventories', [InventoryController::class, 'store']);
+        Route::put('inventories/{inventory}/items', [InventoryController::class, 'updateItems']);
+        Route::post('inventories/{inventory}/confirm', [InventoryController::class, 'confirm']);
+    });
+
+    // 报表打印（所有认证用户）
+    Route::get('/reports/stock-in/{id}/print', [ReportController::class, 'stockInPrint']);
+    Route::get('/reports/stock-out/{id}/print', [ReportController::class, 'stockOutPrint']);
+    Route::get('/reports/inventory/{id}/print', [ReportController::class, 'inventoryPrint']);
+    Route::get('/reports/stock-summary', [ReportController::class, 'stockSummary']);
+
+    // 仪表盘（所有认证用户）
+    Route::get('/dashboard', [DashboardController::class, 'index']);
+
+    // 操作日志（仅 admin）
+    Route::middleware('role:admin')->group(function () {
+        Route::get('/logs', [LogController::class, 'index']);
+        Route::get('/logs/options', [LogController::class, 'options']);
     });
 });
